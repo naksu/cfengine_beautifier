@@ -3,7 +3,7 @@
 CFEngine configuration file beautifier written in Python. It can be used standalone or via Sublime Text.
 
 - Integrates Sublime Text 2. Sublime Text 3 support coming later.
-- Installation for sublime my cloning into Packages folder. Installation via Package Manager coming soon.
+- Installation for Sublime by cloning into Sublime Text's Packages folder. Installation via Package Manager coming soon.
 
 Sublime text options
 
