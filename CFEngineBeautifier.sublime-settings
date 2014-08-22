@@ -1,0 +1,7 @@
+{
+    "beautify_on_save": true,
+    "page_width" : 100,
+    "remove_empty_promise_types" : true,
+    // Whether to sort vars: before classes: etc, i.e., CFEngine normal ordering
+    "sort_promise_types_to_evaluation_order" : true
+}

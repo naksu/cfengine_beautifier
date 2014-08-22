@@ -1,0 +1,165 @@
+ ###
+  #   Multi line comment to start with
+ #
+
+     #1 Comment about bundle
+     # 1 Second line of comment about bundle
+bundle
+
+# Standalone comment between bundle and agent
+
+  agent    # 1 This EOL comment will unfortunately move to after brace (not ideal, but good enough)
+# # 1 LINE comment
+  # 1 Continued Line
+myb { # 1 EOL comment after {
+} # 1 EOL AFTER BRACE
+
+#Standalone comment
+ #   Standalone comment Line 2
+
+# Comment about myb2
+bundle  agent    # EOL comment myb2
+# # LINE comment myb2 and " quote " "
+  # Continued Line myb2
+myb2 { # EOL comment open brace in myb2
+# Comment on empty list
+} bundle agent myb3 {} # EOL comment on myb3
+
+bundle agent myb4 {
+  # Before vars
+  vars:         #     EOL on vars
+
+      "promise with eol comment and promisee" # EOL on promiser
+        -> "promisee"
+        constraint => "value" # EOL on constraint
+        ;
+
+ "Invalid comma after promise", # comment after comma
+      comment => "This issue found in CFEngine 3.6rc1";
+
+# before class
+    class::# EOL on class
+      "promise" # EOL on promise name
+slist=>{"val1","val2"}, # EOL on slist
+# Comment before all_eol
+all_eol#EOL on constraint name all_eol
+=>#EOL on assign
+"foo2"#EOL on constraint value foo2
+,#EOL on comma for all_eol
+#Comment before handle
+handle=>"Foo"
+; # EOL on promise
+
+
+      "it supports EOL comment on last arg"
+        usebundle => bundlename(arg1, # EOL comment on arg1
+
+                                arg2# Comment on arg2
+                                );
+
+      "it supports end of line comment for empty argument list"
+        usebundle => bundlename(), # EOL comment on constraint1
+        usebundle2 => bundlename() # EOL comment on constraint2
+        ,
+        usebundle => namespaced:func_with_comments # EOL comment for symbol
+        ,
+        comment => "a comment";
+
+"promise with standalone comments in constraint list"
+slist => {},
+
+# Standalone comment
+
+handle => "handle",
+# Standalone comment2
+
+handle2 => "handle2";
+
+    # this comment should be indented because it is _not_ the last element before class
+
+      "promise";
+
+    # this comment should not be indented because it _is_ the last element before class
+
+    class::
+      "promise";
+
+    # this comment should not be indented because it is the last element
+
+}
+
+bundle agent ident_of_comments_before_any_promise {
+  vars:
+
+      # Should indent this comment on class level
+
+    any::
+      "promise";
+
+  classes:
+    class_x::
+
+      # Should indent this comment on class level
+
+    any::
+      "promise";
+}
+
+bundle server should_not_have_empty_line_after_promise_type_and_before_comment {
+    field_edits:
+
+    # There should be no empty line before this comment
+        "promise";          }
+
+bundle agent removes_empty_line_before_first_element {
+vars:
+
+any::
+"promise";
+}
+
+body agent removes_empty_line_before_first_element_when_class {
+
+any::
+selection => "value1";
+}
+
+body agent removes_empty_line_before_first_element_when_selection {
+
+selection => "value2";
+}
+
+body agent removes_empty_line_before_first_element_when_comment {
+
+# Comment
+
+selection => "value3";
+}
+
+body agent control
+
+{
+# Class level standalone comment
+
+ any::
+
+ # This should be intended since it is before a selection
+
+  ifelapsed => "1";
+
+
+ # This is not intended since it is before class
+
+ debian::
+
+  environment => { "value" };
+
+  # Comment
+
+  long_selection_is_broken_to_lines => "--------------------------------------------------------------";
+
+    # Comment after
+}
+
+
+# Standalone oneliner

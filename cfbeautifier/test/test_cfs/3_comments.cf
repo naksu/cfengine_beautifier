@@ -1,0 +1,133 @@
+###
+# This file is preformatted to look as expected
+# Parser should be able to parse it and presentation should output it without
+# modifications. This file is, however, first broken into bits and then
+# reassembled, so this does test the beautification efficiently.
+#
+
+# This is a comment about myb bundle
+# This is the second line about myb bundle
+# Standalone comment between bundle and agent
+bundle agent myb {
+  # This bundle contains no promises, just this comment
+} # 1 EOL AFTER BRACE
+
+# Standalone comment
+# Standalone comment Line 2
+
+bundle agent myb3 {
+} # EOL comment on myb3
+
+bundle agent myb4 {
+  # Standalone before promise types
+
+  # Before vars promise type
+  vars: # EOL on vars
+    # before class
+    class:: # EOL on class
+      "just_promise"; # EOL on just_promise
+      # EOL on promise name
+      "promise"
+        slist => { "value1", "value2" }, # EOL on slist
+        # Comment for this_list_has_comments
+        this_list_has_comments => {
+                                  "lval1", # EOL comment,
+                                  # Line comment and space for lval2
+                                  "lval2",
+
+                                  # Line comment and space for lval3
+                                  "lval3",
+
+                                  "lval with space before",
+
+                                  # Comment at the end with space before
+
+                                  # Another comment at the end
+                                  },
+        # Comment for second_constraint
+        second_constraint => "foo2", # EOL comment for second_constraint
+        handle => "Foo"; # EOL on promise, however this is assumed to relate to the constraint
+
+      # Standalone comment in promise level
+
+    # Standalone comment in class-level
+
+  # Standalone comment on promise-type level
+
+  # Comment before class
+  classes: # Comment before class
+      # Comment on class_promise
+      "class_promise";
+
+      # Comment on promise
+      "promise with comment" constraint => "value";
+
+      "promise with eol comment and two constraints"
+        constraint => "value",
+        another => "true";
+
+      "promise with eol comment and two constraints"
+        constraint => "value", # EOL on constraint
+        another => "true";
+
+      # If too long, should not inline promisee
+      "promise with eol comment and two constraints text text text text text text text"
+        -> "promisee"
+        constraint => "value", # EOL on constraint
+        another => "true";
+
+      # If not too long, should inline promisee
+      "promise with eol comment and two constraints text text text text text text tex" -> "promisee"
+        constraint => "value", # EOL on constraint
+        another => "true";
+}
+
+bundle common this_bundle_has_long_name_so_arguments_must_be_inlined_so_here_we_go(argument1_not_fit_,
+                                                                                   argument2,
+                                                                                   argument3) {
+}
+
+bundle common this_bundle_has_long_name_so_arguments_does_not_fit_but_one_arg_func_is_not_lined(argument1_not_fit_) {
+}
+
+bundle common arguments_with_comments(argument1_not_fit_, # comment 1
+                                      argument2, # comment2
+                                      argument3) {
+  vars:
+      "promise" usebundle => bundlename(arg1, # EOL comment on arg1
+                                        # Comment on arg2
+                                        arg2);
+
+      "it supports commenting of function args"
+        comment => "a comment",
+        usebundle => bundlename(arg1, # EOL comment on arg1
+                                # Comment on arg2
+                                arg2);
+}
+
+# Standalone oneliner
+
+bundle common mostly_empty {
+  promise_type_with_child_comment:
+    # This is not removed since it has a child comment
+
+  promise_type_with_end_of_line_comment: # This is not removed since it has an end of line comment
+
+  # This is not removed since it has an line comment
+  promise_type_with_line_comment:
+}
+
+body common some {
+    selection3 => "value3";
+
+    # Standalone comment in selection level
+
+  # Standalone comment in class-level
+
+  class_name::
+    selection => "value";
+
+    selection2 => "value2";
+}
+
+# Standalone oneliner at end

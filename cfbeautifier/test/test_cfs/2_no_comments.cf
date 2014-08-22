@@ -1,0 +1,193 @@
+
+
+ bundle  agent  bundle1 (arg1 ,  arg2 )  {
+
+vars:
+
+"just_promi\"se"
+;
+"empty_list"
+ slist
+ =>
+  {
+
+ }
+  ;
+"list_with_one"  slist  => { "one unicode äää" ,};
+
+"list_with_two" slist => {  "one"   ,  "two",@(interpolated_list) };
+      "this_list_fits" slist => { "one", "two", "three", "four", "five", "six", "seven", "eights" };
+      "this_list_fits_but_due_to_terminator_line_is_broken" slist => { "one", "two", "three", "fo" };
+      "list_does_not_quite_fit" slist => { "one", "two", "three", "four", "five", "six", "sevenxxx" };
+      "too_long_list" slist => { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", };
+      "little_longer_list_so_that_will_not_fit_by_moving_to_own_lines"
+        slist => { "long text here one", "long text here two", "long text here two" };
+
+      "far_too_long_list"
+        slist => {
+
+          "long text here repeat repeat repeat repeat repeat repeat repeat one", "long text here repeat repeat repeat repeat repeat repeat repeat two",
+                 "long text here repeat repeat repeat repeat repeat repeat repeat three",
+                 "long text here repeat repeat repeat repeat repeat repeat repeat four",
+
+                 "long text here repeat repeat repeat repeat repeat repeat repeat five",
+                 "long text here repeat repeat repeat repeat repeat repeat repeat six",
+
+                 "long text here repeat repeat repeat repeat repeat repeat repeat seven",
+                 "long text here repeat repeat repeat repeat repeat repeat repeat eight",
+                 "long text here repeat repeat repeat repeat repeat repeat repeat nine",
+                 };
+"far_too_long_list_with_another_constraint" constraint => "any",slist=>{"long text here repeat repeat repeat repeat repeat repeat repeat one","long text here repeat repeat repeat repeat repeat repeat repeat two"}
+
+
+;
+
+      "far_too_long_list_but_with_only_one_element_should_not_be_lined" slist => { "long text here__" };
+      "far_too_long_list_two_or_more_elements_should_be_lined........." slist => { "long text here__","element2" };
+
+      "list_so_long_i_give_up"
+        slist =>
+          {
+          "long text here repeat repeat repeat repeat repeat repeat repeat repeat repeat repeat repeat one",
+          "long text here repeat repeat repeat repeat repeat repeat repeat repeat repeat repeat repeat two",
+          };
+"list_with_two_and_another_constraint" slist =>
+{  "one"   ,  "two",@(interpolated_list) },handle => "foo";
+    "list_with_array"slist=>
+
+      @(interpolated_list)
+      ;
+       "long_function_call_should_be_broken" usebundle => my_too_long_function_name("argument_1_is_long");
+       "long_function_call_just_one_arg" usebundle => my_too_long_function_name("one_element_no_lining");
+       "long_function_call_should_be_lined" usebundle => my_too_long_function_name(
+
+        "argument_1",
+
+        "argument_2");
+
+  empty_class::
+
+     myclass::
+    "first_promise"->"promisee";
+  "second_promise"
+
+   with=>"argument";
+"third_promise"
+         ->
+  "promisee"  with
+
+   =>   "many" arguments => "present"
+
+
+  usebundle_with_two_args =>
+
+
+   func(
+
+            arg1
+
+                   ,
+
+              arg2  ), usebundle_with_no_args => func,
+  usebundle_with_empty_args => func(), usebundle_with_one_arg => func("one"),
+  usebundle_with_namespace => my_namespace:func(),
+  usebundle_with_namespace => my_namespace:no_args,
+  usebundle_with_namespace => my_namespace:args(arg),
+usebundle_with_list_function=> @(functions)("args")
+  list_with_namespace=>{"symbol:string",symbol:string},
+;
+classes: "i_am_class"
+
+ expression
+
+  =>
+
+ "this.that";
+
+ class2::
+
+"there_should_be_no_space_after_class";
+
+ "Invalid comma after promise",
+      comment => "This issue found in CFEngine 3.6rc1";
+
+
+}
+
+
+
+  bundle
+   agent
+    empty_bundle
+    (
+      )
+       {
+
+       }
+bundle agent just_one_promise_type {vars: "I promise";}
+body
+      common
+        first_body {
+          arg=>
+          "value";
+        }body  common  second_body{arg=>"value";arg2=>"value2";
+        a_class:: arg2 => "value2";}
+
+         bundle  agent  empty_promise_types_are_removed (arg1 ,  arg2 )  {
+
+vars:
+classes:}
+
+bundle agent i_wish_to_sort_promise_types {
+files: "files_promise";
+guest_environments: "guest_environments_promise";
+storage: "storage_promise";
+meta: "meta_promise";
+defaults: "defaults_promise";
+users: "users_promise";
+  # Comment on services
+services: "services_promise";
+
+# Standalone comment follows next standalone comment
+
+# Standalone comment moves with the next promise type
+
+classes: "classes_promise";
+databases: "databases_promise";
+commands: "commands_promise";
+reports: "reports_promise";
+processes: "processes_promise";
+methods: "methods_promise";
+vars: "vars_promise";
+unknown_promise_type_goes_last: "unknown_promise_type_goes_last_promise";
+packages: "packages_promise";
+}
+
+bundle server i_wish_to_sort_promise_types {
+access: "access_promise";
+reports: "reports_promise";
+classes: "classes_promise";
+roles: "roles_promise";
+vars: "vars_promise";
+}
+
+bundle monitor i_wish_to_sort_promise_types {
+ reports: "reports_promise";
+measurements: "measurements_promise";
+classes: "classes_promise";
+vars: "vars_promise";
+access: "access_promise";
+roles: "roles_promise";
+}
+
+bundle edit_line i_wish_to_sort_promise_types {
+delete_lines: "delete_lines_promise";
+classes: "classes_promise";
+replace_patterns: "replace_patterns_promise";
+field_edits: "field_edits_promise";
+vars: "vars_promise";
+reports: "reports_promise";
+insert_lines: "insert_lines_promise";
+
+# Last standalone index stays last
+}

@@ -1,0 +1,22 @@
+###
+# This comment is preceded by space.
+	#	This comment is preceded by tab and which should be converted to space.
+	#		This comment is preceded by tab, first of which should be converted to space.	Tab there.
+# Just text.
+#
+
+# This is a comment about myb bundle
+bundle agent myb {
+	# Comment about the vars
+	vars:
+class:: # EOL on class
+	"this_is_promise"	slist
+	=> 	{	"this is value"	} 	,
+	handler => "here"	;
+
+	# Comment about class
+	second_class::
+} 	# 1 EOL AFTER BRACE
+
+	# Standalone comment
+	# Standalone comment Line 2
