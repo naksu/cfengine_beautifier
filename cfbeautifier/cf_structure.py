@@ -467,15 +467,15 @@ class Promise(Node):
             promiser_and_promisee = promiser_lines
 
         # Options are:
-        #   promisee -> promiser
+        #   promiser -> promisee
         #     constraint;
         #
-        #   promisee constraint;
+        #   promiser constraint;
         #
         #   promiser # if long promiser
         #     constraint;
         #
-        #   promisee
+        #   promiser
         #     constraint
         #     constraint;
         #
@@ -532,7 +532,7 @@ class Constraint(Node):
                                               self["value"].lines(options.child(TAB_SIZE))))
         return first_that_fits(options, lines_fns)
 
-# This is inside under body { ... }
+# This is inside body { ... }
 class Selection(Constraint):
     def __init__(self, *args):
         super(Selection, self).__init__(*args)
@@ -544,7 +544,7 @@ def first_that_fits(options, lines_fns):
     """
     Returns the first set of lines returned by the "make lines" function that fits into the available
     width"
-    lines_fn signature: (options) -> lines, where each line is [(string, indentation_depth), ...]
+    lines_fn signature: (options) -> [Line, ...]
     """
     lines = []
     for lines_fn in lines_fns:
@@ -780,7 +780,6 @@ EVALUATION_ORDER = ["meta:",
 class PromiseTypeList(ListBase):
     def after_parse(self, options):
         super(PromiseTypeList, self).after_parse(options)
-
         if options.removes_empty_promise_types:
             self.items = self._empty_promise_types_removed(self.items)
         if options.sorts_promise_types_to_evaluation_order:
