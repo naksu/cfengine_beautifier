@@ -1,4 +1,6 @@
-import cfbeautifier.cf_beautifier as beautifier
+from __future__ import absolute_import
+from cfbeautifier import beautifier
+from cfbeautifier.util import ParserError
 import sublime, sublime_plugin
 
 STATUS_KEY = 'cfengine-beautifier'
@@ -28,7 +30,7 @@ class BeautifyCfengineCommand(sublime_plugin.TextCommand):
                                   beautifier.beautified_string(self.view.substr(buffer_region),
                                                               options = self.options()))
                 self.set_viewport_state(view_state)
-            except beautifier.ParserError as error:
+            except ParserError as error:
                 error_region = sublime.Region(error.position, error.position + len(error.fragment))
                 self.view.add_regions("parser_errors", [error_region], "invalid.illegal", "circle")
                 if moves_cursor:

@@ -1,17 +1,19 @@
+from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-# Enable loading of module from parent directory
-import os, sys
-parent_dir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
-sys.path.append(parent_dir)
+import os
+test_cf_dir = os.path.join(os.path.realpath(os.path.dirname(os.path.realpath(__file__))), "test_cfs")
 
-import cf_beautifier as beautifier
-from cf_color import Color
+from .. import beautifier
+from ..color import Color
 import random
-import cf_structure as structure
-from cf_structure import Line
+from .. import structure
+from ..structure import Line
+from ..util import ParserError
+from .. import util
 import re
+import sys
 import time
 import unittest
 
@@ -84,17 +86,9 @@ class TestStructureHelpers(unittest.TestCase):
                                                       reverse = True),
                                  "a", "Supports not finding in reverse")
 
-def string_from_file(path):
-  if sys.version_info[0] < 3:
-    with open(path, "r") as file:
-        return file.read().decode('utf-8-sig')
-  else:
-    with open(path, "r", encoding = "utf-8-sig") as file:
-        return file.read()
-
 def cf_file_names():
-    return [os.path.join("test_cfs", name)
-            for name in os.listdir("test_cfs")
+    return [os.path.join(test_cf_dir, name)
+            for name in os.listdir(test_cf_dir)
             if re.match(r"^((?!expected).)*$", name) and name.endswith(".cf")]
 
 def randomly_whitespaced(spec_string, line_endings):
@@ -130,9 +124,9 @@ class TestEndToEnd(unittest.TestCase):
             if not os.path.isfile(expected_file_path):
               # There is no *_excepted.cf file. Assume cf_file_name is already formatted as expected
               expected_file_path = cf_file_name
-            expected = string_from_file(expected_file_path)
+            expected = util.string_from_file(expected_file_path)
             options = beautifier.Options()
-            original_cf_string = string_from_file(cf_file_name)
+            original_cf_string = util.string_from_file(cf_file_name)
             beautified = beautifier.beautified_string(original_cf_string,
                                                       options = options)
             # Beautification should match expected
@@ -163,7 +157,7 @@ class TestEndToEnd(unittest.TestCase):
 """
         try:
           beautifier.beautified_string(cf_string)
-        except beautifier.ParserError as error:
+        except ParserError as error:
           self.assertEqual("Syntax error, line 3, column 24: '=>'", str(error), "Is human readable")
           self.assertEqual(3, error.line_number, "Knows line number of the error")
           self.assertEqual(24, error.column, "Knows column of the error")
@@ -211,3 +205,9 @@ class TestEndToEnd(unittest.TestCase):
 }
 """
         self.assertBeautifies(original, expected, options, "Supports non-removal of empty promises")
+
+def main():
+    unittest.main()
+
+if __name__ == '__main__':
+  main()

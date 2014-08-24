@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 from __future__ import unicode_literals
-import cf_beautifier as beautifier
-import ply.lex as lex
+from .util import ParserError
+from .ply import lex
 
 t_ARROW = r"->"
 t_ASSIGN = r"=>"
@@ -55,7 +56,7 @@ def t_comment(t):
     t.lexer.comments.append(t)
 
 def t_error(t):
-    raise beautifier.ParserError(t.value, t.lineno, t.lexer.lexdata, t.lexpos)
+    raise ParserError(t.value, t.lineno, t.lexer.lexdata, t.lexpos)
 
 tokens = ([token for token in [id[2:] for id in globals().keys() if id.startswith("t_")]
                # exclude t_error, etc

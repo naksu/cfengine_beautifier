@@ -1,11 +1,11 @@
-#!/usr/bin/env python
-
+from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
-import cf_beautifier as beautifier
-import cf_lexer as lexer
-import cf_structure as structure
-import ply.yacc as yacc
+from . import lexer
+from .util import ParserError
+from . import structure
+from . import util
+from .ply import yacc
 import re
 import sys
 
@@ -230,12 +230,8 @@ def declare_grammar():
 
 declare_grammar()
 
-def previous_end_of_line_pos(string, lexpos):
-    "Return -1 if at the beginning of string"
-    return string.rfind('\n', 0, lexpos)
-
 def p_error(p):
-    raise beautifier.ParserError(p.value, p.lineno, p.lexer.lexdata, p.lexpos)
+    raise ParserError(p.value, p.lineno, p.lexer.lexdata, p.lexpos)
 
 yacc.yacc(debug = False)
 
@@ -280,7 +276,7 @@ def specification_from_string(string, options):
         state = State()
 
         for token in reversed(comment_tokens):
-            previous_eol_pos = previous_end_of_line_pos(string, token.lexpos)
+            previous_eol_pos = util.previous_end_of_line_pos(string, token.lexpos)
             # The original indentation is used to figure out whether standalone comments belong to
             # promise type list or class promise list
             original_indentation = token.lexpos - previous_eol_pos - 1

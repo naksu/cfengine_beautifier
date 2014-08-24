@@ -1,1 +1,1 @@
-__all__ = ["cf_color", "cf_structure"]
+__all__ = ["beautifier", "color", "util"]
