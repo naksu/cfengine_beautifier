@@ -28,7 +28,7 @@ class Color:
     def strip(string):
         return re.sub("\033\[\d+.*?m", "", string)
 
-# Declare method for each color in Color calss
+# Declare method for each color in Color class
 for color in filter(lambda color: color.upper() == color, dir(Color)):
     def make_fn(color):
         color_code = Color.__dict__[color]
