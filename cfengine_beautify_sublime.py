@@ -1,7 +1,12 @@
-from __future__ import absolute_import
-from cfbeautifier import beautifier
-from cfbeautifier.util import ParserError
+import sys
 import sublime, sublime_plugin
+
+if sys.version_info[0] < 3:
+    from cfbeautifier import beautifier
+    from cfbeautifier.util import ParserError
+else:
+    from .cfbeautifier import beautifier
+    from .cfbeautifier.util import ParserError
 
 STATUS_KEY = 'cfengine-beautifier'
 
