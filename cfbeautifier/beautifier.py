@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from . import parser
 from . import structure
 import copy
-import sys
 
 class Options(object):
     def __init__(self):

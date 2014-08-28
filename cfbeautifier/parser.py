@@ -6,6 +6,7 @@ from .util import ParserError
 from . import structure
 from . import util
 from .ply import yacc
+import os
 import re
 import sys
 
@@ -233,7 +234,8 @@ declare_grammar()
 def p_error(p):
     raise ParserError(p.value, p.lineno, p.lexer.lexdata, p.lexpos)
 
-yacc.yacc(debug = False)
+yacc.yacc(debug = False,
+          picklefile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "parsetab.pickle"))
 
 ######
 
