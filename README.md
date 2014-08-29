@@ -8,6 +8,15 @@ CFEngine configuration file beautifier written in Python.
 
 ### Sublime Text Installation
 
+#### Via Package Manager
+
+1. Ctrl + Shift + p (Linux, Windows) or Cmd + Shift + p (OS X).
+2. Type "install package"
+3. Type "cfenginebeautifier"
+4. Enter
+
+For more information: https://sublime.wbond.net/docs/usage
+
 #### Manual Installation
 
 1. Navigate to Sublime Text Packages Directory
@@ -37,10 +46,6 @@ CFEngine configuration file beautifier written in Python.
   - More information: http://sublimetext.info/docs/en/basic_concepts.html
 
 2. git clone https://github.com/naksu/cfengine_beautifier.git
-
-#### Package Manager
-
-- Coming soon.
 
 ### Sublime Text Options
 
