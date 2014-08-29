@@ -1,18 +1,55 @@
 # CFEngine Beautifier
 
-CFEngine configuration file beautifier written in Python. It can be used standalone or via Sublime Text.
+CFEngine configuration file beautifier written in Python.
 
+- Command line interface
 - Integrates with Sublime Text 2 and Sublime Text 3.
-- Installation for Sublime by cloning into Sublime Text's Packages folder. Installation via Package Manager coming soon.
+- Installation for Sublime by cloning into Sublime Text's Packages folder.
 
-#### Sublime Text Options
+### Sublime Text Installation
+
+#### Manual Installation
+
+1. Navigate to Sublime Text Packages Directory
+
+  <table>
+    <tr>
+      <th>Platform</th>
+      <th>Sublime Text 2</th>
+      <th>Sublime Text 3</th>
+    </tr>
+    <tr>
+      <td>Linux</td>
+      <td>~/.config/sublime-text-2/Packages</td>
+      <td>~/.config/sublime-text-3/Packages</td>
+    </tr>
+    <tr>
+      <td>OS X</td>
+      <td>~/Library/Application Support/Sublime Text 2/Packages</td>
+      <td>~/Library/Application Support/Sublime Text 3/Packages</td>
+    </tr>
+    <tr>
+      <td>Windows</td>
+      <td>%APPDATA%\Sublime Text 2/Packages</td>
+      <td>%APPDATA%\Sublime Text 3/Packages</td>
+    </tr>
+  </table>
+  - More information: http://sublimetext.info/docs/en/basic_concepts.html
+
+2. git clone https://github.com/naksu/cfengine_beautifier.git
+
+#### Package Manager
+
+- Coming soon.
+
+### Sublime Text Options
 
 <table>
   <tr>
-    <td>Option</td>
-    <td>Description</td>
-    <td>Value</td>
-    <td>Default</td>
+    <th>Option</th>
+    <th>Description</th>
+    <th>Value</th>
+    <th>Default</th>
   </tr>
   <tr>
     <td>beautify_on_save</td>
@@ -40,6 +77,6 @@ CFEngine configuration file beautifier written in Python. It can be used standal
   </tr>
 </table>
 
-#### Command Line Options
+### Command Line Options
 
 Run cf-beautify --help
