@@ -94,6 +94,37 @@ handle2 => "handle2";
 
 }
 
+  bundle
+  # Agent comment
+   agent
+      # Name comment
+       comments_before_opening_brace_in_bundle
+
+      # Comment before brace
+
+      # Comment before brace, second line
+
+          {
+  vars:
+
+      # Comment for var
+  "foo";
+}
+
+  body
+  # Type comment
+   perms
+      # Name comment
+       comments_before_opening_brace_in_body
+
+      # Comment before brace
+
+      # Comment before brace, second line
+
+          {
+selection => "foo";
+  }
+
 bundle agent ident_of_comments_before_any_promise {
   vars:
 

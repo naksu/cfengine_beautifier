@@ -105,6 +105,33 @@ bundle common arguments_with_comments(argument1_not_fit_, # comment 1
                                 arg2);
 }
 
+bundle agent bundle_with_comments_before_brace
+# This is a comment before brace
+{
+  # Comment for vars
+  vars:
+      # Comment for var
+      "My var" string => "value";
+}
+
+bundle agent bundle_with_comments_before_brace_in_empty_bundle
+# This is a comment before brace
+{
+}
+
+bundle agent bundle_with_multi_line_comment_before_brace
+# This is a comment before brace
+# Second line
+{
+}
+
+body perms body_with_comments_before_brace
+# This is a comment before brace
+{
+    # Comment for selection
+    selection => "value";
+}
+
 # Standalone oneliner
 
 bundle common mostly_empty {

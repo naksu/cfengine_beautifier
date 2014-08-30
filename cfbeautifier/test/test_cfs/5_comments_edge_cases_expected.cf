@@ -81,6 +81,26 @@ bundle agent myb4 {
     # this comment should not be indented because it is the last element
 }
 
+# Agent comment
+# Name comment
+bundle agent comments_before_opening_brace_in_bundle
+# Comment before brace
+# Comment before brace, second line
+{
+  vars:
+      # Comment for var
+      "foo";
+}
+
+# Type comment
+# Name comment
+body perms comments_before_opening_brace_in_body
+# Comment before brace
+# Comment before brace, second line
+{
+    selection => "foo";
+}
+
 bundle agent ident_of_comments_before_any_promise {
   vars:
     # Should indent this comment on class level

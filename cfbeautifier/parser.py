@@ -119,7 +119,7 @@ def declare_grammar():
 
         ["bundle : bundle_token id id aitems_node bundle_statements_node", structure.Bundle]] +
         list_of("bundle_statement", structure.PromiseTypeList,
-                open = "open_brace", close = "close_brace", empty = True) +
+                open = "comments_keeping_open_brace", close = "close_brace", empty = True) +
       [["bundle_statement : promise_type classpromises_node", structure.PromiseType],
         ["promise_type : PROMISE_TYPE", structure.String]] +
         list_of("classpromise", structure.ClassPromiseList, empty = True) +
@@ -139,7 +139,7 @@ def declare_grammar():
 
        ["body : body_token id id aitems_node bodyattribs_node", structure.Body]] +
         list_of("bodyattrib", structure.ClassSelectionList,
-                open = "open_brace", close = "close_brace") +
+                open = "comments_keeping_open_brace", close = "close_brace") +
        [["""bodyattrib : class
                        | selection semicolon""", first],
         ["selection : constraint_id assign rval maybe_comma", structure.Selection],
@@ -166,6 +166,7 @@ def declare_grammar():
         ["""semicolon : SEMICOLON
           close_brace : CLOSE_BRACE
           close_paren : CLOSE_PAREN""", priority_comments(2, structure.String)],
+        ["comments_keeping_open_brace : OPEN_BRACE", structure.String],
         ["""       comma : COMMA
                   string : QSTRING
                 nakedvar : NAKEDVAR

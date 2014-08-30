@@ -625,7 +625,7 @@ class ListBase(Node):
     def _lines(self, options):
         return first_that_fits(options, map(lambda list_arg:
                                                 lambda options: self._format_items(options, **list_arg),
-                                            self.list_args()))
+                                            self.list_args(options)))
     def _format_items(self, options,
                       join_by = None,
                       prefix_by = None,
@@ -676,7 +676,7 @@ class InlinableList(ListBase):
         has_comments = find_in_list(lambda node: node.comments or isinstance(node, Comment),
                                     self.items)
         return not has_comments
-    def list_args(self):
+    def list_args(self, options):
         inlined_args, lined_args = self._inlined_and_lined_list_args()
         if not self.inlinable():
             return [lined_args]
@@ -724,7 +724,7 @@ class ArgumentList(InlinableList):
         return ARGUMENT_LIST_ARGS
 
 class Specification(ListBase):
-    def list_args(self):
+    def list_args(self, options):
         return [{ "join_by" : LINE_BREAK,
                   "postfix_by" : LINE_BREAK }]
 
@@ -779,6 +779,42 @@ PROMISE_TYPE_LIST_ARGS, CLASS_SELECTION_LIST_ARGS = (
                                     "respects_preceding_empty_line_fn" :
                                         # Never empty line before the first class or selection
                                         does_not_respect_empty_line_before_first_item }]))
+
+def block_list_args(block, options, list_args_base):
+    """
+    Helper for bundle element list (PromiseTypeList) and body child list (ClassSelectionList)
+    to be able to have comments on the opening brace. Those two classes have a different class
+    hierarchy, so this cannot be done via inheritance.
+    block: must be a PromiseTypeList or ClassSelectionList
+    options: options as given to lines function
+    list_args_base: Either PROMISE_TYPE_LIST_ARGS (if block is PromiseTypeList)
+                    or CLASS_SELECTION_LIST_ARGS (if block is ClassSelectionList)
+    Returns either list_args_base as is, or as modified to include the opening brace comments
+    """
+    open_brace = block["open_brace"]
+    if open_brace.comments:
+        list_args = copy.deepcopy(list_args_base)
+        open_brace_lines = open_brace.lines(options)
+        list_args[0]["empty"] = [Line("")] + open_brace_lines + [Line("}")]
+        list_args[0]["start"] = [Line("")] + open_brace_lines + [Line("")]
+        return list_args
+    else:
+        return list_args_base
+
+def add_comments_to_block_child_list(block, comments, parents):
+    """
+    Helper for bundle element list (PromiseTypeList) and body child list (ClassSelectionList)
+    to be able to pass possible comments for opening brace. Passes the rest to superclass.
+    """
+    open_brace = block["open_brace"]
+    open_brace_comments, comments = (
+        partition(lambda comment:
+                      comment.position.start_pos < open_brace.position.start_pos,
+                  comments))
+    open_brace.add_comments(open_brace_comments, parents + [block])
+    super(block.__class__, block).add_comments(comments, parents)
+
+
 EVALUATION_ORDER = ["meta:",
                     "vars:",
                     "defaults:",
@@ -808,6 +844,8 @@ EVALUATION_ORDER = ["meta:",
                     "reports:"]
 # Items should be PromiseTypes or Comments
 class PromiseTypeList(ListBase):
+    def add_comments(self, comments, parents):
+        add_comments_to_block_child_list(self, comments, parents)
     def after_parse(self, options):
         super(PromiseTypeList, self).after_parse(options)
         if options.removes_empty_promise_types:
@@ -851,8 +889,8 @@ class PromiseTypeList(ListBase):
         promise_types, comments = partition(isinstance_fn(PromiseType), items)
         sorted_promise_types = sorted(promise_types, key = promise_index)
         return with_interleaved_comments(sorted_promise_types, items, comments)
-    def list_args(self):
-        return PROMISE_TYPE_LIST_ARGS
+    def list_args(self, options):
+        return block_list_args(self, options, PROMISE_TYPE_LIST_ARGS)
     def is_standalone_comment_for_node(self, item, comment):
         # The indentation for promise type is 1 * tab size, so assume anything above that belongs
         # to the node
@@ -874,8 +912,10 @@ class ClassAndSomethingList(ListBase):
 
 # Items should be Classes, Selections or Comments.
 class ClassSelectionList(ClassAndSomethingList):
-    def list_args(self):
-        return CLASS_SELECTION_LIST_ARGS
+    def add_comments(self, comments, parents):
+        add_comments_to_block_child_list(self, comments, parents)
+    def list_args(self, options):
+        return block_list_args(self, options, CLASS_SELECTION_LIST_ARGS)
 
 # Promises are indented as if they are under classes in tree, so deeper
 CLASS_PROMISE_LIST_ARGS = [{ "depth_fn" : class_list_depth_fn(2, Promise),
@@ -885,7 +925,7 @@ CLASS_PROMISE_LIST_ARGS = [{ "depth_fn" : class_list_depth_fn(2, Promise),
                              "join_by" : LINE_BREAK }]
 # for Bundle, elements should be PromiseTypes. For Body, they should be Classes or Selections.
 class ClassPromiseList(ClassAndSomethingList):
-    def list_args(self):
+    def list_args(self, options):
         return CLASS_PROMISE_LIST_ARGS
 
 CONSTRAINT_LIST_ARGS = [{ "empty" : [Line(";")],
@@ -893,7 +933,7 @@ CONSTRAINT_LIST_ARGS = [{ "empty" : [Line(";")],
                           "terminator" : ",",
                           "end_terminator" : ";" }]
 class ConstraintList(ListBase):
-    def list_args(self):
+    def list_args(self, options):
         return CONSTRAINT_LIST_ARGS
 
 class Function(Node):
