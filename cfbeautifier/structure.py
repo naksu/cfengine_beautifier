@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
+from .color import Color
 from functools import reduce
 from itertools import chain
 import copy
@@ -8,6 +9,13 @@ import re
 import sys
 
 TAB_SIZE = 2
+
+DEBUG_SHOULD_LOG_COMMENTS = False # Never push True to remote master
+# When logging comments is enabled, this string will be highlighted
+DEBUG_COMMENT_TO_TRACK = "promise"
+
+if DEBUG_SHOULD_LOG_COMMENTS:
+    import traceback
 
 class Position(object):
     def __init__(self, start_line_number, end_line_number, start_pos, end_pos, parse_index = None):
@@ -47,6 +55,8 @@ class Line(object):
         return isinstance(line, self.__class__) and self.__dict__ == line.__dict__
     def __ne__(self, line):
         return not self.__eq__(line)
+    def __repr__(self):
+        return 'Line("%s", %s)' % (self.string, str(self.indent))
 
 class Options(object):
     DEFAULT_RESPECTS_PRECEDING_EMPTY_LINE = None
@@ -109,6 +119,13 @@ def line_lengths(lines):
 def max_line_length(lines):
     return max(line_lengths(lines))
 
+def log_comment(*args):
+    def depth_of_add_comments():
+        method_stack = map(lambda stack_line: stack_line[2], traceback.extract_stack())
+        return len(list(filter(lambda method: method.startswith("add_comments"), method_stack)))
+    if DEBUG_SHOULD_LOG_COMMENTS:
+        print(" " * depth_of_add_comments(), *args)
+
 def partition(is_included_fn, items):
     """
     Return (included, excluded) pair, in which first element is a list for which is_included_fn
@@ -148,6 +165,7 @@ def add_comments_to_items(items, comments_by_item, parents):
     for item in items:
         comments = comments_by_item.get(item)
         if comments:
+            log_comment(Color.magenta("Add comments to "), item, Color.blue("Comments"), comments)
             item.add_comments(comments, parents)
 
 def is_end_of_line_comment_for(node, comment, nodes):
@@ -222,6 +240,7 @@ def items_and_comments_by_item(items, comments, standalone_policy,
             last_item = items[-1]
             list_onto_add = comments_by_item[last_item] = comments_by_item.get(last_item, [])
 
+        log_comment(Color.yellow("Appending comment"), comment, Color.yellow("to"), list_onto_add)
         list_onto_add.append(comment)
     new_items.extend(items[item_index:])
     return (new_items, comments_by_item)
@@ -263,13 +282,16 @@ class Node(object):
     def adopt_comments(self, comments, priority, parents):
         "Priority affects selection of end-of-line comment"
         if self.priority_of_giving_parent_comments:
+            log_comment(self, Color.red("GIVING COMMENT TO PARENT"), comments)
             self.give_comment_for_adoption(comments, parents)
         else:
+            log_comment(Color.cyan("Adopt comments in"), self, Color.blue("Comments"), comments)
             for comment in comments:
                 comment.priority = priority
             self.comments.extend(comments)
     def add_comments(self, comments, parents):
         # All the given comments must be assignable and be assigned, otherwise an error
+        log_comment(Color.blue("add_comments"), self, comments)
         new_items, comments_by_item = items_and_comments_by_item(self.children(), comments,
                                                                  standalone_policy = "give_to_child")
         add_comments_to_items(new_items, comments_by_item, parents + [self])
@@ -340,6 +362,8 @@ class Node(object):
             return string
         line_endings = options.line_endings or "\n"
         return line_endings.join(map(string_from_line, self.lines(options)))
+    def __repr__(self):
+        return self.__class__.__name__
 
 class Block(Node):
     def __init__(self, position, element, type, name, args, block_child_list):
@@ -405,6 +429,11 @@ class Comment(Node):
                 separator = " "
             return Line("#%s" % separator + text, 0)
         return map(text_for_line, self.text_lines)
+    def __repr__(self):
+        lines_string = ",".join(map(lambda line:
+                                        Color.green(line) if DEBUG_COMMENT_TO_TRACK in line else line,
+                                     self.text_lines))
+        return "p%s (%s) %s" % (str(self.priority), self.type, lines_string)
 
 class PromiseType(Node):
     def __init__(self, position, name, class_promise_list):
@@ -566,6 +595,8 @@ class ListBase(Node):
     def len(self):
         return len(self.items)
     def add_comments(self, comments, parents):
+        log_comment(Color.red("List"), self, Color.blue("Given comments"), comments)
+
         if self["close_brace"]:
             close_brace_comments, comments = (
                 partition(lambda comment:
@@ -883,7 +914,10 @@ class String(Node):
     def _lines(self, options):
         return [Line(self.name, 0)]
     def add_comments(self, comments, parents):
+        log_comment(Color.red("Add comments to String"), self, Color.blue("Comments"), comments)
         if self.priority_of_giving_parent_comments:
             self.give_comment_for_adoption(comments, parents)
         else:
             self.comments = comments
+    def __repr__(self):
+        return "%s('%s')" % (self.__class__.__name__, self.name[0:6])
