@@ -449,11 +449,11 @@ class Promise(Node):
         promiser_lines = self["promiser"].lines(no_indent_options)
 
         # Options are:
-        #   promisee -> promiser
+        #   promiser -> promisee
         #
         # If too long:
         #   promiser_long
-        #     -> promiser
+        #     -> promisee
 
         if self["promisee"]:
             promisee_lines = self["promisee"].lines(no_indent_options)
