@@ -383,7 +383,6 @@ class Block(Node):
                                         self["name"].lines(child_options))
         return joined_lines(lines_until_args,
                             self["args"].lines(options.child(lines_until_args)),
-                            space,
                             self["block_child_list"].lines(child_options))
 
 class Body(Block):
@@ -771,8 +770,8 @@ def does_not_respect_empty_line_before_first_item(is_first):
 
 PROMISE_TYPE_LIST_ARGS, CLASS_SELECTION_LIST_ARGS = (
   map(lambda dict: [merged_dicts(dict, { "postfix_by" : LINE_BREAK,
-                                         "empty" : [Line("{"), Line("}")],
-                                         "start" : [Line("{"), Line("")],
+                                         "empty" : [Line(" {"), Line("}")],
+                                         "start" : [Line(" {"), Line("")],
                                          "end" : [Line("}")] })],
                                  [{ "join_by" : LINE_BREAK,
                                     "depth_fn" : lambda list, node: TAB_SIZE },
