@@ -631,7 +631,7 @@ class ListBase(Node):
                       join_by = None,
                       prefix_by = None,
                       postfix_by = None,
-                      empty = [""],
+                      empty = [Line("")],
                       start = None,
                       end = None,
                       terminator = "",
@@ -639,8 +639,7 @@ class ListBase(Node):
                       respects_preceding_empty_line_fn = lambda is_first: None, # None means ignored
                       depth_fn = lambda list, node: 0):
         join_by, prefix_by, postfix_by, empty, start, end = (
-            map(lambda strings: list(map(Line, strings)) if strings else None,
-                [join_by, prefix_by, postfix_by, empty, start, end]))
+            map(copy.deepcopy, [join_by, prefix_by, postfix_by, empty, start, end]))
 
         def child_lines(node, terminator, index):
             # Avoid commas etc at the end of standalone comments
@@ -671,7 +670,7 @@ class ListBase(Node):
                                      child_line_arrays[0])
             return joined_lines(start, children_lines, end)
 
-LINE_BREAK = ["", ""]
+LINE_BREAK = [Line(""), Line("")]
 
 class InlinableList(ListBase):
     def inlinable(self):
@@ -693,32 +692,32 @@ class InlinableList(ListBase):
         """
         raise RuntimeError("To be implemented by deriving class")
 
-LIST_ARGS = ({ "join_by" : [" "],
+LIST_ARGS = ({ "join_by" : [Line(" ")],
                "terminator" : ",",
-               "empty" : ["{}"],
-               "start" : ["{ "],
-               "end" : [" }"],
+               "empty" : [Line("{}")],
+               "start" : [Line("{ ")],
+               "end" : [Line(" }")],
                "respects_preceding_empty_line_fn" : lambda is_first: False },
              # lined version
              { "postfix_by" : LINE_BREAK,
                "terminator" : ",",
                "end_terminator" : ",",
-               "empty" : ["{}",],
-               "start" : ["{", ""],
-               "end" : ["}"],
+               "empty" : [Line("{}")],
+               "start" : [Line("{"), Line("")],
+               "end" : [Line("}")],
                "respects_preceding_empty_line_fn" : lambda is_first: not is_first })
 class List(InlinableList):
     def _inlined_and_lined_list_args(self):
         return LIST_ARGS
 
-ARGUMENT_LIST_ARGS = ({ "join_by" : [" "],
+ARGUMENT_LIST_ARGS = ({ "join_by" : [Line(" ")],
                         "terminator" : ",",
-                        "start" : ["("],
-                        "end" : [")"] },
+                        "start" : [Line("(")],
+                        "end" : [Line(")")] },
                       { "join_by" : LINE_BREAK,
                         "terminator" : ",",
                         "end_terminator" : ")",
-                        "start" : ["("],
+                        "start" : [Line("(")],
                         # 1 == len("(") })
                         "depth_fn" : lambda list, node: 1 })
 class ArgumentList(InlinableList):
@@ -772,9 +771,9 @@ def does_not_respect_empty_line_before_first_item(is_first):
 
 PROMISE_TYPE_LIST_ARGS, CLASS_SELECTION_LIST_ARGS = (
   map(lambda dict: [merged_dicts(dict, { "postfix_by" : LINE_BREAK,
-                                         "empty" : ["{", "}"],
-                                         "start" : ["{", ""],
-                                         "end" : ["}"] })],
+                                         "empty" : [Line("{"), Line("}")],
+                                         "start" : [Line("{"), Line("")],
+                                         "end" : [Line("}")] })],
                                  [{ "join_by" : LINE_BREAK,
                                     "depth_fn" : lambda list, node: TAB_SIZE },
                                   { "depth_fn" : class_list_depth_fn(1, Selection),
@@ -890,7 +889,7 @@ class ClassPromiseList(ClassAndSomethingList):
     def list_args(self):
         return CLASS_PROMISE_LIST_ARGS
 
-CONSTRAINT_LIST_ARGS = [{ "empty" : [";"],
+CONSTRAINT_LIST_ARGS = [{ "empty" : [Line(";")],
                           "join_by" : LINE_BREAK,
                           "terminator" : ",",
                           "end_terminator" : ";" }]
