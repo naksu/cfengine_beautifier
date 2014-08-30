@@ -149,7 +149,7 @@ class TestEndToEnd(unittest.TestCase):
                                                   options = options)
         self.assertEqualLines(beautified, expected, message)
 
-    def test_erro(self):
+    def test_error(self):
         cf_string = """bundle agent foo {
   classes:
     "promise" slist => => "value";

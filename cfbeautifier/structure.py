@@ -289,8 +289,8 @@ class Node(object):
             for comment in comments:
                 comment.priority = priority
             self.comments.extend(comments)
+    # All the given comments must be assignable and be assigned, otherwise an error
     def add_comments(self, comments, parents):
-        # All the given comments must be assignable and be assigned, otherwise an error
         log_comment(Color.blue("add_comments"), self, comments)
         new_items, comments_by_item = items_and_comments_by_item(self.children(), comments,
                                                                  standalone_policy = "give_to_child")
