@@ -256,7 +256,8 @@ class Node(object):
         # Controls whether gives comments to parent. Also controls with comment gets to be end of
         # line comment if many end of line comments.
         #   None: keeps the comment itself (or gives to child)
-        #   1: keeps the comment with low priority
+        #   1: keeps the comment with low priority (if there is another comment with high priority,
+        #      that comments is the end of line comment instead of this one)
         #   2: keeps the comment with high priority
         self.priority_of_giving_parent_comments = None
     def after_parse(self, options):
