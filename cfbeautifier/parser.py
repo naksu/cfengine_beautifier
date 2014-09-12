@@ -164,9 +164,9 @@ def declare_grammar():
        [["""maybe_comma : none
                         | comma""", first],
         ["""semicolon : SEMICOLON
-          close_brace : CLOSE_BRACE
           close_paren : CLOSE_PAREN""", priority_comments(2, structure.String)],
-        ["comments_keeping_open_brace : OPEN_BRACE", structure.String],
+        ["""comments_keeping_open_brace : OPEN_BRACE
+                            close_brace : CLOSE_BRACE""", structure.String],
         ["""       comma : COMMA
                   string : QSTRING
                 nakedvar : NAKEDVAR

@@ -16,13 +16,14 @@ bundle agent myb {
 #   Standalone comment Line 2
 
 # Comment about myb2
+# EOL comment myb2
 # # LINE comment myb2 and " quote " "
 # Continued Line myb2
 bundle agent myb2 {
   # EOL comment open brace in myb2
 
   # Comment on empty list
-} # EOL comment myb2
+}
 
 bundle agent myb3 {
 } # EOL comment on myb3

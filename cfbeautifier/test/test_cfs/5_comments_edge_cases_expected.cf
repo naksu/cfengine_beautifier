@@ -16,16 +16,35 @@ bundle agent myb {
 #   Standalone comment Line 2
 
 # Comment about myb2
+# EOL comment myb2
 # # LINE comment myb2 and " quote " "
 # Continued Line myb2
 bundle agent myb2 {
   # EOL comment open brace in myb2
 
   # Comment on empty list
-} # EOL comment myb2
+}
 
 bundle agent myb3 {
 } # EOL comment on myb3
+
+# Comment before bundle
+# EOL after bundle name
+bundle agent comment_after_bundle_name {
+}
+
+# Comment before body
+# EOL after body name
+body perms comment_after_body_name {
+    some => "true";
+}
+
+bundle agent empty_with_comment_after_open_and_close_brace
+# 1 EOL AFTER BRACE
+{
+  vars:
+      "foo";
+} # 1 EOL AFTER BRACE
 
 bundle agent myb4 {
   # Before vars
@@ -99,6 +118,19 @@ body perms comments_before_opening_brace_in_body
 # Comment before brace, second line
 {
     selection => "foo";
+}
+
+# Some comments before
+# Second line
+# This is the trailing comment
+bundle agent trailing_comment_after_bundle_name {
+}
+
+# Some comments before
+# Second line
+# This is the trailing comment
+body perms trailing_comment_after_body_name {
+    s => "foo";
 }
 
 bundle agent ident_of_comments_before_any_promise {

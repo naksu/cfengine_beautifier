@@ -260,6 +260,8 @@ class Node(object):
         #      that comments is the end of line comment instead of this one)
         #   2: keeps the comment with high priority
         self.priority_of_giving_parent_comments = None
+        # If False, forces all end-of-line comments to be next-node comments
+        self.allows_end_of_line_comments = True
     def after_parse(self, options):
         pass
     def _node_names(self):
@@ -289,6 +291,10 @@ class Node(object):
             log_comment(Color.cyan("Adopt comments in"), self, Color.blue("Comments"), comments)
             for comment in comments:
                 comment.priority = priority
+            if not self.allows_end_of_line_comments:
+                for comment in comments:
+                    if comment.is_end_of_line:
+                        comment.type = "next-node"
             self.comments.extend(comments)
     # All the given comments must be assignable and be assigned, otherwise an error
     def add_comments(self, comments, parents):
@@ -374,6 +380,7 @@ class Block(Node):
         self["name"] = name
         self["args"] = args
         self["block_child_list"] = block_child_list
+        self.allows_end_of_line_comments = False
     def _lines(self, options):
         child_options = options.child()
         space = [Line(" ")]
@@ -793,11 +800,27 @@ def block_child_list_args(block, options, list_args_base):
     Returns either list_args_base as is, or as modified to include the opening brace comments
     """
     open_brace = block["open_brace"]
-    if open_brace.comments:
+    close_brace = block["close_brace"]
+    # Avoid the copy for performance reasons if it is not necessary
+    if open_brace.comments or close_brace.comments:
+        # This contains unfortunate duplication of PROMISE_TYPE_LIST_ARGS generation logic
         list_args = copy.deepcopy(list_args_base)
-        open_brace_lines = open_brace.lines(options)
-        list_args[0]["empty"] = [Line("")] + open_brace_lines + [Line("}")]
-        list_args[0]["start"] = [Line("")] + open_brace_lines + [Line("")]
+
+        if open_brace.comments:
+            open_brace_lines = [Line("")] + open_brace.lines(options)
+            list_args[0]["start"] = open_brace_lines + [Line("")]
+            empty_lines = open_brace_lines
+        else:
+            empty_lines = [Line(" {")]
+
+        if close_brace.comments:
+            close_brace_lines = close_brace.lines(options)
+            list_args[0]["end"] = close_brace_lines
+            empty_lines.extend(close_brace_lines)
+        else:
+            empty_lines.append(Line("}"))
+
+        list_args[0]["empty"] = empty_lines
         return list_args
     else:
         return list_args_base

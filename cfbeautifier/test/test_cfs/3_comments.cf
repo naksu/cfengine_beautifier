@@ -18,6 +18,54 @@ bundle agent myb {
 bundle agent myb3 {
 } # EOL comment on myb3
 
+bundle agent bundle_with_comment_before_open_and_after_close_brace
+# 1 EOL AFTER BRACE
+{
+  vars:
+      "foo";
+} # 1 EOL AFTER BRACE
+
+body perms body_with_comment_before_open_and_after_close_brace
+# 1 EOL AFTER BRACE
+{
+    vars => "foo";
+} # 1 EOL AFTER BRACE
+
+bundle agent bundle_with_comment_after_close_brace {
+  vars:
+      "foo";
+} # 1 EOL AFTER BRACE
+
+body perms body_with_comment__after_close_brace {
+    vars => "foo";
+} # 1 EOL AFTER BRACE
+
+bundle agent bundle_with_comment_before_open_brace
+# 1 EOL AFTER BRACE
+{
+  vars:
+      "foo";
+}
+
+body perms body_with_comment_before_open_brace
+# 1 EOL AFTER BRACE
+{
+    vars => "foo";
+}
+
+bundle agent empty_bundle_with_comment_before_open_and_after_close_brace
+# 1 EOL AFTER BRACE
+{
+} # 1 EOL AFTER BRACE
+
+bundle agent empty_bundle_with_comment_after_close_brace {
+} # 1 EOL AFTER BRACE
+
+bundle agent empty_bundle_with_comment_before_open_brace
+# 1 EOL AFTER BRACE
+{
+}
+
 bundle agent myb4 {
   # Standalone before promise types
 
@@ -43,7 +91,7 @@ bundle agent myb4 {
                                   # Comment at the end with space before
 
                                   # Another comment at the end
-                                  },
+                                  }, # EOL on list
         # Comment for second_constraint
         second_constraint => "foo2", # EOL comment for second_constraint
         handle => "Foo"; # EOL on promise, however this is assumed to relate to the constraint
