@@ -104,14 +104,15 @@ def randomly_whitespaced(spec_string, line_endings):
 
 class TestEndToEnd(unittest.TestCase):
     def assertEqualLines(self, actual, expected, message):
-        actual_lines = actual.split("\n")
-        expected_lines = expected.split("\n")
-        for index, (actual_line, expected_line) in enumerate(map(lambda actual, expected:
-                                                                     (actual, expected),
-                                                                 actual_lines, expected_lines)):
+        def numbered_lines(document):
+            return ["%3d: %s" % (index, line) for index, line in enumerate(document.split("\n"))]
+        actual_lines = numbered_lines(actual)
+        expected_lines = numbered_lines(expected)
+        for actual_line, expected_line in zip(actual_lines, expected_lines):
             self.assertEqual(actual_line, expected_line,
-                             "%s: Different lines at %d\n+'%s'\n-'%s'\n\n+++ACTUAL\n%s\n\n---EXPECTED\n%s" %
-                                 (message, index, actual_line, expected_line, actual, expected))
+                             "+++ACTUAL\n%s\n\n---EXPECTED\n%s\n\n%s: Different lines\n+'%s'\n-'%s'" %
+                                 ("\n".join(actual_lines), "\n".join(expected_lines),
+                                  message, actual_line, expected_line))
 
     def test_beautify(self):
         seed = int(time.time())
