@@ -781,7 +781,7 @@ PROMISE_TYPE_LIST_ARGS, CLASS_SELECTION_LIST_ARGS = (
                                         # Never empty line before the first class or selection
                                         does_not_respect_empty_line_before_first_item }]))
 
-def block_list_args(block, options, list_args_base):
+def block_child_list_args(block, options, list_args_base):
     """
     Helper for bundle element list (PromiseTypeList) and body child list (ClassSelectionList)
     to be able to have comments on the opening brace. Those two classes have a different class
@@ -891,7 +891,7 @@ class PromiseTypeList(ListBase):
         sorted_promise_types = sorted(promise_types, key = promise_index)
         return with_interleaved_comments(sorted_promise_types, items, comments)
     def list_args(self, options):
-        return block_list_args(self, options, PROMISE_TYPE_LIST_ARGS)
+        return block_child_list_args(self, options, PROMISE_TYPE_LIST_ARGS)
     def is_standalone_comment_for_node(self, item, comment):
         # The indentation for promise type is 1 * tab size, so assume anything above that belongs
         # to the node
@@ -916,7 +916,7 @@ class ClassSelectionList(ClassAndSomethingList):
     def add_comments(self, comments, parents):
         add_comments_to_block_child_list(self, comments, parents)
     def list_args(self, options):
-        return block_list_args(self, options, CLASS_SELECTION_LIST_ARGS)
+        return block_child_list_args(self, options, CLASS_SELECTION_LIST_ARGS)
 
 # Promises are indented as if they are under classes in tree, so deeper
 CLASS_PROMISE_LIST_ARGS = [{ "depth_fn" : class_list_depth_fn(2, Promise),
