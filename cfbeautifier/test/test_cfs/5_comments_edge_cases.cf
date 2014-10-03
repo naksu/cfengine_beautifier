@@ -81,6 +81,15 @@ handle=>"Foo"
         ,
         comment => "a comment";
 
+      "it supports lining a single constraint with EOL comment"
+        string => "value" # Line 1
+        ;
+
+      "it does not line single constraint with line and EOL comment"
+        # Line comment
+        string => "value" # EOL
+        ;
+
 "promise with function with comment after brace"
 usebundle => the_bundle(# comment
                         # comment 2

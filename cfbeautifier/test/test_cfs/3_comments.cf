@@ -180,6 +180,18 @@ body perms body_with_comments_before_brace
     selection => "value";
 }
 
+bundle agent comments_before_single_constraint_keep_it_own_its_own_line {
+  vars:
+      "one comment"
+        # Line 1
+        string => "value";
+
+      "two_comments"
+        # Line 1
+        # Line 2
+        string => "value";
+}
+
 # Standalone oneliner
 
 bundle common mostly_empty {

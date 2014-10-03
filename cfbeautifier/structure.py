@@ -312,6 +312,25 @@ class Node(object):
             if self.comments[0].position.end_line_number == line_number - 1:
                 return self.comments[0].position.start_line_number
         return line_number
+    def tail_comment(self):
+        "Return end-of-line comment, or None if it does not exist"
+        return find_in_list(lambda comment:
+                                (comment.is_end_of_line() and
+                                 # In case the EOL comment was adopted (not at end of
+                                 # this node's lines), consider it a standalone comment
+                                 # (actual case: argument list's first element being a
+                                 # comment on the same line on # which the opening brace
+                                 # is).
+                                 self.position.covers(comment.position.start_line_number)),
+                            reversed(sorted(self.comments,
+                                            key = lambda comment: comment.priority)))
+    def line_comments(self, tail_comment = None):
+        """
+        Return comments that are before the element (not on the same line)
+        If the client knows the tail_comment, it may supply it as an optimisation
+        """
+        tail_comment = tail_comment or self.tail_comment()
+        return [comment for comment in self.comments if comment != tail_comment]
     def lines(self, options):
         def merged_comment(comments):
             merged_comment = copy.deepcopy(comments[0])
@@ -323,23 +342,14 @@ class Node(object):
             # Indentation assumes that first line of the child is indented by the parent, and any
             # following lines are intended by the child here, to given depth for this child, in options
             comment_options = options.child()
-            tail_comment = find_in_list(lambda comment:
-                                            (comment.is_end_of_line() and
-                                             # In case the EOL comment was adopted (not at end of
-                                             # this node's lines), consider it a standalone comment
-                                             # (actual case: argument list's first element being a
-                                             # comment on the same line on # which the opening brace
-                                             # is).
-                                             self.position.covers(comment.position.start_line_number)),
-                                        reversed(sorted(self.comments,
-                                                        key = lambda comment: comment.priority)))
+            tail_comment = self.tail_comment()
             if tail_comment:
                 tail_comment_lines = joined_lines([Line(" ")],
                                                   tail_comment.lines(comment_options))
             else:
                 tail_comment_lines = []
 
-            line_comments = [comment for comment in self.comments if comment != tail_comment]
+            line_comments = self.line_comments(tail_comment)
             if line_comments:
                 line_comment = merged_comment(line_comments)
                 line_comment_lines = line_comment.lines(comment_options)
@@ -534,7 +544,10 @@ class Promise(Node):
         if (self["constraints"].len() == 1
             and not self["promisee"]
             and self["promiser"].position.start_line_number
-                    == self["promiser"].position.end_line_number):
+                    == self["promiser"].position.end_line_number
+            # If the only constraint has line comments, keep it on its own line; otherwise, the
+            # comments would be indented at the end of promise name
+            and not self["constraints"].item_at(0).line_comments()):
             # A single constraint may fit on the same line as the promise.
             # First try to fit on one line (without allowing line break in constraint), and if does
             # not fit, put the constraint on its own line (constraing will first try without line
@@ -601,6 +614,10 @@ class ListBase(Node):
         return filter(None, [self["open_brace"]] + self.items + [self["close_brace"]])
     def len(self):
         return len(self.items)
+    def item_at(self, index):
+        return self.items[name_or_index]
+    def item_at(self, index):
+        return self.items[index]
     def add_comments(self, comments, parents):
         log_comment(Color.red("List"), self, Color.blue("Given comments"), comments)
 
