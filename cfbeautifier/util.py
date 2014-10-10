@@ -19,9 +19,16 @@ class ParserError(Exception):
                            "Syntax error, line %d, column %d: '%s'" % (line_number, self.column, fragment))
 
 def string_from_file(path):
-  if sys.version_info[0] < 3:
-    with open(path, "r") as file:
-        return file.read().decode('utf-8-sig')
-  else:
-    with open(path, "r", encoding = "utf-8-sig") as file:
-        return file.read()
+    if sys.version_info[0] < 3:
+        kwargs = {}
+    else:
+        kwargs = { encoding: "utf-8-sig" }
+
+    with open(path, "r", **kwargs) as file:
+        return string_from_stream(file)
+
+def string_from_stream(stream):
+    if sys.version_info[0] < 3:
+        return stream.read().decode('utf-8-sig')
+    else:
+        return stream.read()

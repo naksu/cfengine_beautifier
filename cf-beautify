@@ -8,6 +8,10 @@ from cfbeautifier import util
 import os
 import sys
 
+def write_output(path, output):
+    with open(path, 'w') as file:
+        file.write(output.encode("utf-8"))
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
@@ -17,7 +21,7 @@ if __name__ == "__main__":
                         help = "Output file. Cannot be used with multiple input files",
                         metavar = "FILE")
     parser.add_argument("--stdout", action = "store_true", dest = "use_stdout",
-                        help = "Use stdout instead of output file or overwriting original")
+                        help = "Write to stdout instead of output file or overwriting original")
     parser.add_argument("-c", "--keep-empty", action = "store_true",
                         dest = "keeps_empty_promise_types", help = "Keep empty promise types")
     parser.add_argument("-n", "--keep-order", action = "store_true",
@@ -30,11 +34,13 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--line-endings",
                         dest = "line_endings",
                         help = "Line endings: 'windows', 'unix', 'detect'. Default 'detect'")
-    parser.add_argument("input_paths", nargs = "+", help = "Input path")
+    parser.add_argument("input_paths", nargs = "*",
+                        help = """
+                               Source .cf file paths. If input paths are not specified, reads
+                               from stdin instead. If --out is not specified, use of stdin assumes
+                               --stdout.")
+                               """)
     args = parser.parse_args()
-
-    if not args.input_paths:
-        raise AssertionError("No path given")
 
     paths = []
     for input_path in args.input_paths:
@@ -74,6 +80,16 @@ if __name__ == "__main__":
             print("Invalid line endings: '%s'" % args.line_endings)
             exit(-1)
 
+    # stdin?
+    if not paths:
+        input = util.string_from_stream(sys.stdin)
+        output = beautifier.beautified_string(input, options)
+        if args.output_path:
+            write_output(args.output_path, output)
+        else:
+            print(output)
+
+    # beautify given file names
     for path in paths:
         print_verbose("Processing... " + path, end = "")
         input = util.string_from_file(path)
@@ -82,7 +98,6 @@ if __name__ == "__main__":
             print(output)
         elif input != output:
             print_verbose(Color.green(" -> Beautified"))
-            with open(args.output_path or path, 'w') as file:
-                file.write(output.encode("utf-8"))
+            write_output(args.output_path or path, output)
         else:
             print_verbose("") # add line feed
