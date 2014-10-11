@@ -5,15 +5,11 @@ from . import lexer
 from .util import ParserError
 from . import structure
 from . import util
+from .version_abstraction import text_class
 from .ply import yacc
 import os
 import re
 import sys
-
-if sys.version_info[0] < 3:
-    text_class = unicode
-else:
-    text_class = str
 
 tokens = lexer.tokens
 

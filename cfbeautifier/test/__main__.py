@@ -3,19 +3,33 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-test_cf_dir = os.path.join(os.path.realpath(os.path.dirname(os.path.realpath(__file__))), "test_cfs")
+
+this_dir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+beautifier_executable_path = os.path.join(this_dir, "cf-beautifier")
+test_cf_dir = os.path.join(this_dir, "test_cfs")
 
 from .. import beautifier
 from ..color import Color
+from ..version_abstraction import string_from_file
 import random
 from .. import structure
 from ..structure import Line
 from ..util import ParserError
-from .. import util
 import re
-import sys
+import shutil
+import subprocess
+import tempfile
 import time
 import unittest
+
+temp_dir = os.path.join(tempfile.gettempdir(), "cfbeautifier_tmp")
+
+def clear_temp_dir():
+  try:
+    shutil.rmtree(temp_dir)
+  except OSError:
+    pass
+  os.makedirs(temp_dir)
 
 class TestStructureHelpers(unittest.TestCase):
     def assertEqualWithDiff(self, actual, expected, message):
@@ -114,20 +128,28 @@ class TestEndToEnd(unittest.TestCase):
                                  ("\n".join(actual_lines), "\n".join(expected_lines),
                                   message, actual_line, expected_line))
 
-    def test_beautify(self):
-        seed = int(time.time())
-        print("Running test with random seed", seed)
-        random.seed(seed)
-
+    def _for_original_and_expected_in_each_cf_file(self, fn):
+        """
+        Calls fn for each cf test file
+        fn must have signature (original, expected, cf_file_name) -> None
+        """
         for cf_file_name in cf_file_names():
             print(Color.red(cf_file_name))
             expected_file_path = cf_file_name[0:-3] + "_expected.cf"
             if not os.path.isfile(expected_file_path):
               # There is no *_excepted.cf file. Assume cf_file_name is already formatted as expected
               expected_file_path = cf_file_name
-            expected = util.string_from_file(expected_file_path)
+            expected = string_from_file(expected_file_path)
+            original_cf_string = string_from_file(cf_file_name)
+            fn(original_cf_string, expected, cf_file_name)
+
+    def test_beautify(self):
+        seed = int(time.time())
+        print("Running test with random seed", seed)
+        random.seed(seed)
+
+        def compare(original_cf_string, expected, cf_file_name):
             options = beautifier.Options()
-            original_cf_string = util.string_from_file(cf_file_name)
             beautified = beautifier.beautified_string(original_cf_string,
                                                       options = options)
             # Beautification should match expected
@@ -144,6 +166,8 @@ class TestEndToEnd(unittest.TestCase):
                                                                                     None)),
                                       options = options),
                                     expected, cf_file_name + " not convergent")
+
+        self._for_original_and_expected_in_each_cf_file(compare)
 
     def assertBeautifies(self, original, expected, options, message):
         beautified = beautifier.beautified_string(original,
@@ -206,6 +230,35 @@ class TestEndToEnd(unittest.TestCase):
 }
 """
         self.assertBeautifies(original, expected, options, "Supports non-removal of empty promises")
+
+    def test_command_line_interface_with_stdin(self):
+        def compare(original_cf_string, expected, cf_file_name):
+            beautified, err = beautified_via_cli([], original_cf_string)
+            self.assertEqual(err, "")
+            self.assertEqualLines(beautified, expected, cf_file_name)
+
+        self._for_original_and_expected_in_each_cf_file(compare)
+
+    def test_command_line_interface_with_output_file(self):
+        clear_temp_dir()
+        def compare(original_cf_string, expected, cf_file_name):
+            output_path = os.path.join(temp_dir, "tmp.cf")
+            for stream in beautified_via_cli(["--out", output_path, cf_file_name],
+                                             original_cf_string):
+              self.assertEqual(stream, "")
+            self.assertEqualLines(string_from_file(output_path), expected, cf_file_name)
+
+        self._for_original_and_expected_in_each_cf_file(compare)
+
+def beautified_via_cli(args, input):
+    process = subprocess.Popen(["./cf-beautify"] + args,
+                               stdin = subprocess.PIPE,
+                               stdout = subprocess.PIPE,
+                               stderr = subprocess.PIPE)
+    out, err = process.communicate(input.encode("utf-8"))
+    out = out.decode('utf-8-sig')
+    err = err.decode('utf-8-sig')
+    return (out, err)
 
 def main():
     unittest.main()

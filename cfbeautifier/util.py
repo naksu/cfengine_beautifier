@@ -17,18 +17,3 @@ class ParserError(Exception):
         self.fragment = fragment
         Exception.__init__(self,
                            "Syntax error, line %d, column %d: '%s'" % (line_number, self.column, fragment))
-
-def string_from_file(path):
-    if sys.version_info[0] < 3:
-        kwargs = {}
-    else:
-        kwargs = { encoding: "utf-8-sig" }
-
-    with open(path, "r", **kwargs) as file:
-        return string_from_stream(file)
-
-def string_from_stream(stream):
-    if sys.version_info[0] < 3:
-        return stream.read().decode('utf-8-sig')
-    else:
-        return stream.read()

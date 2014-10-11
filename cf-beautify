@@ -3,14 +3,18 @@
 from __future__ import absolute_import
 from __future__ import print_function
 from cfbeautifier.color import Color
+from cfbeautifier.version_abstraction import string_from_file, string_from_stream, write_stream
 from cfbeautifier import beautifier
-from cfbeautifier import util
+import codecs
 import os
 import sys
 
 def write_output(path, output):
-    with open(path, 'w') as file:
-        file.write(output.encode("utf-8"))
+    if path:
+        with open(path, 'w') as file:
+            write_stream(file, output)
+    else:
+        write_stream(sys.stdout, output)
 
 if __name__ == "__main__":
     import argparse
@@ -82,22 +86,19 @@ if __name__ == "__main__":
 
     # stdin?
     if not paths:
-        input = util.string_from_stream(sys.stdin)
+        input = string_from_stream(sys.stdin)
         output = beautifier.beautified_string(input, options)
-        if args.output_path:
-            write_output(args.output_path, output)
-        else:
-            print(output)
+        write_output(args.output_path, output)
 
     # beautify given file names
     for path in paths:
         print_verbose("Processing... " + path, end = "")
-        input = util.string_from_file(path)
+        input = string_from_file(path)
         output = beautifier.beautified_string(input, options)
-        if args.use_stdout:
-            print(output)
+        if args.output_path or args.use_stdout:
+            write_output(args.output_path, output)
         elif input != output:
             print_verbose(Color.green(" -> Beautified"))
-            write_output(args.output_path or path, output)
+            write_output(path, output)
         else:
             print_verbose("") # add line feed
