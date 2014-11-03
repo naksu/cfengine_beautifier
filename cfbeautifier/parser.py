@@ -229,7 +229,12 @@ def declare_grammar():
 declare_grammar()
 
 def p_error(p):
-    raise ParserError(p.value, p.lineno, p.lexer.lexdata, p.lexpos)
+    if p:
+        raise ParserError(p.value, p.lineno, p.lexer.lexdata, p.lexpos)
+    else: # End of file
+        # Unfortunately, cannot pass in the string and figure out the last line number, since yacc
+        # does not give the input string.
+        raise ParserError("End of file", 0, "", 0)
 
 yacc.yacc(debug = False,
           picklefile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "parsetab.pickle"))
