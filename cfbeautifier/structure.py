@@ -140,7 +140,7 @@ def partition(is_included_fn, items):
 def find_in_list(predicate, list):
     for item in list:
         if predicate(item):
-            return item;
+            return item
 
 def find_index(predicate, items, start_index = None, not_found = None, reverse = False):
     if reverse:
@@ -467,7 +467,7 @@ class PromiseType(Node):
             join_by = [Line("")] # line break
         else:
             join_by = []
-        child_options = options.child();
+        child_options = options.child()
         return joined_lines(self["name"].lines(child_options),
                             join_by + self["class_promise_list"].lines(child_options))
 
@@ -486,7 +486,7 @@ class Promise(Node):
         self["promisee"] = promisee
         self["maybe_comma"] = maybe_comma # This is never output
         self["constraints"] = constraints
-        self["semicolon"] = semicolon;
+        self["semicolon"] = semicolon
         self.respects_preceding_empty_line = True
     def _lines(self, options):
         promisee_lines = []
