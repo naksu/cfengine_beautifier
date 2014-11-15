@@ -192,6 +192,19 @@ bundle agent comments_before_single_constraint_keep_it_own_its_own_line {
         string => "value";
 }
 
+bundle agent space_between_comment_and_first_promise {
+  vars:
+      # Comment
+
+      "promise";
+
+  classes:
+      # Comment
+      # Second line
+
+      "promise";
+}
+
 # Standalone oneliner
 
 bundle common mostly_empty {

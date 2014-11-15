@@ -131,6 +131,28 @@ handle2 => "handle2";
 
 }
 
+bundle agent space_between_comment_and_first_promise {
+  vars:
+# Comment
+
+      "promise";
+
+  classes:
+         # Comment
+         # Second line
+
+      "promise";
+
+        methods:
+      # Comment
+      # Second line
+
+    aa::
+      "promise";
+
+}
+
+
   bundle
   # Agent comment
    agent

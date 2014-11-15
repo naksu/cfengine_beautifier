@@ -303,6 +303,8 @@ def specification_from_string(string, options):
                 if re.match(r"^[ \t\r]*$", line)]
 
     def set_empty_lines(nodes, empty_line_numbers):
+        nodes = filter(lambda node: node.consumes_preceding_empty_line, nodes) # github #6
+
         def line_number_to_node_map():
             node_by_line_number = {}
             last_line_number = -1

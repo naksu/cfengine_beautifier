@@ -119,6 +119,26 @@ bundle agent myb4 {
     # this comment should not be indented because it is the last element
 }
 
+bundle agent space_between_comment_and_first_promise {
+  vars:
+      # Comment
+
+      "promise";
+
+  classes:
+      # Comment
+      # Second line
+
+      "promise";
+
+  methods:
+    # Comment
+    # Second line
+
+    aa::
+      "promise";
+}
+
 # Agent comment
 # Name comment
 bundle agent comments_before_opening_brace_in_bundle
@@ -155,6 +175,7 @@ body perms trailing_comment_after_body_name {
 bundle agent ident_of_comments_before_any_promise {
   vars:
     # Should indent this comment on class level
+
     any::
       "promise";
 

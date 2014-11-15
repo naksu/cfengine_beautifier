@@ -80,6 +80,7 @@ bundle agent myb4 {
 bundle agent ident_of_comments_before_any_promise {
   vars:
     # Should indent this comment on class level
+
     any::
       "promise";
 

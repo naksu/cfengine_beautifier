@@ -277,6 +277,8 @@ class Node(object):
         self.priority_of_giving_parent_comments = None
         # If False, forces all end-of-line comments to be next-node comments
         self.allows_end_of_line_comments = True
+        # If False, the empty line will be offered to the next node
+        self.consumes_preceding_empty_line = True
     def after_parse(self, options):
         pass
     def _node_names(self):
@@ -1007,6 +1009,9 @@ CLASS_PROMISE_LIST_ARGS = [{ "depth_fn" : class_list_depth_fn(2, Promise),
                              "join_by" : LINE_BREAK }]
 # for Bundle, elements should be PromiseTypes. For Body, they should be Classes or Selections.
 class ClassPromiseList(ClassAndSomethingList):
+    def __init__(self, *args):
+        super(ClassAndSomethingList, self).__init__(*args)
+        self.consumes_preceding_empty_line = False # Github #6
     def list_args(self, options):
         return CLASS_PROMISE_LIST_ARGS
 
