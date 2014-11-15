@@ -245,6 +245,21 @@ def items_and_comments_by_item(items, comments, standalone_policy,
     new_items.extend(items[item_index:])
     return (new_items, comments_by_item)
 
+def first_that_fits(options, lines_fns):
+    """
+    Returns the first set of lines returned by the "make lines" function that fits into the available
+    width"
+    lines_fn signature: (options) -> [Line, ...]
+    """
+    lines = []
+    for lines_fn in lines_fns:
+        lines = lines_fn(options)
+        if max_line_length(lines) <= options.available_width():
+            break
+    return lines
+
+# ----- Node Classes ------------------------------------------------------------------------------
+
 class Node(object):
     def __init__(self, position, text = None):
         self.child_by_name = {}
@@ -590,18 +605,31 @@ class Selection(Constraint):
     def _lines(self, options):
         return joined_lines(super(Selection, self)._lines(options), [Line(";")])
 
-def first_that_fits(options, lines_fns):
-    """
-    Returns the first set of lines returned by the "make lines" function that fits into the available
-    width"
-    lines_fn signature: (options) -> [Line, ...]
-    """
-    lines = []
-    for lines_fn in lines_fns:
-        lines = lines_fn(options)
-        if max_line_length(lines) <= options.available_width():
-            break
-    return lines
+class Function(Node):
+    def __init__(self, position, name, args):
+        super(Function, self).__init__(position)
+        self["name"] = name
+        self["args"] = args
+    def _lines(self, options):
+        name_lines = self["name"].lines(options.child())
+        return joined_lines(name_lines, self["args"].lines(options.child(name_lines)))
+
+class String(Node):
+    def __init__(self, position, name):
+        super(String, self).__init__(position)
+        self.name = name
+    def _lines(self, options):
+        return [Line(self.name, 0)]
+    def add_comments(self, comments, parents):
+        log_comment(Color.red("Add comments to String"), self, Color.blue("Comments"), comments)
+        if self.priority_of_giving_parent_comments:
+            self.give_comment_for_adoption(comments, parents)
+        else:
+            self.comments = comments
+    def __repr__(self):
+        return "%s('%s')" % (self.__class__.__name__, self.name[0:6])
+
+# ----- List Classes ------------------------------------------------------------------------------
 
 class ListBase(Node):
     def __init__(self, position, open_brace, items, trailing_comma, close_brace):
@@ -974,27 +1002,3 @@ CONSTRAINT_LIST_ARGS = [{ "empty" : [Line(";")],
 class ConstraintList(ListBase):
     def list_args(self, options):
         return CONSTRAINT_LIST_ARGS
-
-class Function(Node):
-    def __init__(self, position, name, args):
-        super(Function, self).__init__(position)
-        self["name"] = name
-        self["args"] = args
-    def _lines(self, options):
-        name_lines = self["name"].lines(options.child())
-        return joined_lines(name_lines, self["args"].lines(options.child(name_lines)))
-
-class String(Node):
-    def __init__(self, position, name):
-        super(String, self).__init__(position)
-        self.name = name
-    def _lines(self, options):
-        return [Line(self.name, 0)]
-    def add_comments(self, comments, parents):
-        log_comment(Color.red("Add comments to String"), self, Color.blue("Comments"), comments)
-        if self.priority_of_giving_parent_comments:
-            self.give_comment_for_adoption(comments, parents)
-        else:
-            self.comments = comments
-    def __repr__(self):
-        return "%s('%s')" % (self.__class__.__name__, self.name[0:6])
