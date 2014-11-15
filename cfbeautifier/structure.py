@@ -655,6 +655,21 @@ class ListBase(Node):
         else:
             close_brace_comments = []
 
+        def is_first_comment_at_end_of_line_of_open_brace():
+            return (comments and self.items
+                    and comments[0].is_end_of_line()
+                    and comments[0].position.start_line_number < self.items[0].position.start_line_number)
+
+        # If list is given a comment that is an end-of-line comment of the opening brace, make
+        # it a normal comment, in case there is a standalone comment after the EOL comment.
+        # Otherwise the two first comments will change order. (github issue #7) This is a hack, as
+        # ideally this function would be given those first two comments as a single multiline
+        # comment. How one would actually produce such nice argument is, however, unknown, as how
+        # cat the parser know that the first comment line is part of multiline comment and not
+        # end of line comment for the brace.
+        if is_first_comment_at_end_of_line_of_open_brace():
+            comments[0].type = "standalone"
+
         new_items, comments_by_item = (
             items_and_comments_by_item(self.items, comments,
                                        standalone_policy = "insert",

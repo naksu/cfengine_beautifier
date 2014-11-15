@@ -82,6 +82,19 @@ bundle agent myb4 {
         # Line comment
         string => "value"; # EOL
 
+      # Github #7
+      "no switch list order: EOF on brace + standalone + empty line + text, " slist => {
+                                                                                       # EOL
+                                                                                       # Next line
+
+                                                                                       "item_a",
+                                                                                       };
+      "no switch function order github #7" string => ifelse(# Line 1
+                                                            # Line 2
+                                                            "is_it",
+                                                            "when_true",
+                                                            "when_false");
+
       "promise with function with comment after brace" usebundle => the_bundle(# comment
                                                                                # comment 2
                                                                                arg1,
