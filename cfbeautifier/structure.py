@@ -615,8 +615,6 @@ class ListBase(Node):
     def len(self):
         return len(self.items)
     def item_at(self, index):
-        return self.items[name_or_index]
-    def item_at(self, index):
         return self.items[index]
     def add_comments(self, comments, parents):
         log_comment(Color.red("List"), self, Color.blue("Given comments"), comments)
