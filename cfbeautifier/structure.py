@@ -17,6 +17,9 @@ DEBUG_COMMENT_TO_TRACK = "promise"
 if DEBUG_SHOULD_LOG_COMMENTS:
     import traceback
 
+def merged_dicts(*dicts):
+    return dict(chain(*map(lambda d: d.items(), dicts)))
+
 class Position(object):
     def __init__(self, start_line_number, end_line_number, start_pos, end_pos, parse_index = None):
         self.start_line_number = start_line_number
@@ -72,6 +75,9 @@ class Options(object):
         self.may_line_break_constraint = True
         # if True or False, overrides Node
         self.respects_preceding_empty_line = Options.DEFAULT_RESPECTS_PRECEDING_EMPTY_LINE
+        # If True, () in empty argument list may be removed
+        # If False, function call without () is a syntax error
+        self.allow_braceless_argument_list = True
     def depth(self):
         return self.indent + self.ancestor_indent
     def tabs(self, count):
@@ -576,6 +582,17 @@ class Promise(Node):
             lines_fns = [lined_string]
         return first_that_fits(options, lines_fns)
 
+# The values of these may contain functions. Function arglist in that case will have braces even
+# if the arglist is empty.
+NON_BUNDLE_OR_BODY_CONSTRAINT_TYPES = ["ifvarclass",
+                                       "int",
+                                       "real",
+                                       "string",
+                                       "data",
+                                       "ilist",
+                                       "slist",
+                                       "rlist"]
+
 class Constraint(Node):
     def __init__(self, position, type, assign, value, maybe_comma):
         super(Constraint, self).__init__(position)
@@ -585,18 +602,30 @@ class Constraint(Node):
         self["maybe_comma"] = maybe_comma
     def _lines(self, options):
         type_lines = self["type"].lines(options.child())
+
+        # It appears to be more maintainable to list the constraint types that may have a function
+        # call, than to list all constraint types that may be a bundle or a body (although
+        # cf-promises could be asked for the full body list, which might be used in the future)
+        if self["type"].name in NON_BUNDLE_OR_BODY_CONSTRAINT_TYPES:
+            # Disable removal of braces from function args, if empty arg list
+            value_options_base = copy.copy(options)
+            value_options_base.allow_braceless_argument_list = False
+        else:
+            # Bundle and body arglist may be without braces
+            value_options_base = options
+
         lines_fns = [lambda options:
                          # First try to fit all on the same line
                          joined_lines(type_lines,
                                       [Line(" => ")],
                                       # 4 for " => "
-                                      self["value"].lines(options.child(type_lines, 4)))]
+                                      self["value"].lines(value_options_base.child(type_lines, 4)))]
         if options.may_line_break_constraint:
             lines_fns.append(lambda options:
                                  # If does not fit, break after =>
                                  joined_lines(type_lines,
                                               [Line(" =>"), Line("", TAB_SIZE)],
-                                              self["value"].lines(options.child(TAB_SIZE))))
+                                              self["value"].lines(value_options_base.child(TAB_SIZE))))
         return first_that_fits(options, lines_fns)
 
 # This is inside body { ... }
@@ -605,6 +634,11 @@ class Selection(Constraint):
         super(Selection, self).__init__(*args)
         self.respects_preceding_empty_line = True
     def _lines(self, options):
+        # Body constraint value may currently not be a bundle or body call, so assume it may be
+        # a function call, i.e., disable removal of braces from empty arglist
+        options = copy.deepcopy(options)
+        options.allow_braceless_argument_list = False
+
         return joined_lines(super(Selection, self)._lines(options), [Line(";")])
 
 class Function(Node):
@@ -745,14 +779,14 @@ class InlinableList(ListBase):
                                     self.items)
         return not has_comments
     def list_args(self, options):
-        inlined_args, lined_args = self._inlined_and_lined_list_args()
+        inlined_args, lined_args = self._inlined_and_lined_list_args(options)
         if not self.inlinable():
             return [lined_args]
         elif  1 < len(self.items): # don't line-break a list with just one element
             return [inlined_args, lined_args]
         else:
             return [inlined_args]
-    def _inlined_and_lined_list_args(self):
+    def _inlined_and_lined_list_args(self, options):
         """
         Return a pair of list args, first for inlining the list,
         and second for having line breaks between elements
@@ -774,7 +808,7 @@ LIST_ARGS = ({ "join_by" : [Line(" ")],
                "end" : [Line("}")],
                "respects_preceding_empty_line_fn" : lambda is_first: not is_first })
 class List(InlinableList):
-    def _inlined_and_lined_list_args(self):
+    def _inlined_and_lined_list_args(self, options):
         return LIST_ARGS
 
 ARGUMENT_LIST_ARGS = ({ "join_by" : [Line(" ")],
@@ -787,8 +821,14 @@ ARGUMENT_LIST_ARGS = ({ "join_by" : [Line(" ")],
                         "start" : [Line("(")],
                         # 1 == len("(") })
                         "depth_fn" : lambda list, node: 1 })
+# This version of ARGUMENT_LIST_ARGS prevents empty argument list for functions
+ARGUMENT_LIST_ARGS_NON_BRACELESS = tuple(map(lambda arg: merged_dicts(arg,
+                                                                      { "empty" : [Line("()")] }),
+                                         ARGUMENT_LIST_ARGS))
 class ArgumentList(InlinableList):
-    def _inlined_and_lined_list_args(self):
+    def _inlined_and_lined_list_args(self, options):
+        if not options.allow_braceless_argument_list:
+            return ARGUMENT_LIST_ARGS_NON_BRACELESS
         return ARGUMENT_LIST_ARGS
 
 class Specification(ListBase):
@@ -828,9 +868,6 @@ def class_list_depth_fn(default_class_tab_depth, class_of_intended_node):
                 return 2
         return tab_depth() * TAB_SIZE
     return class_list_depth
-
-def merged_dicts(*dicts):
-    return dict(chain(*map(lambda d: d.items(), dicts)))
 
 # This is a respects_preceding_empty_line_fn function
 def does_not_respect_empty_line_before_first_item(is_first):

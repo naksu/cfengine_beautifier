@@ -103,6 +103,33 @@ bundle agent bundle1(arg1, arg2) {
       "Invalid comma after promise" comment => "This issue found in CFEngine 3.6rc1";
 }
 
+bundle agent bundle_no_args_gets_braces_removed {
+  vars:
+      "state" data => datastate();
+      "as" data => funcall("jk");
+      "now" int => now();
+      "slist_" slist => funcall();
+      "rlist_" rlist => funcall();
+      "ilist_" ilist => funcall();
+      "int_" int => funcall();
+      "real_" real => funcall();
+      "string_" string => funcall();
+      "data_" data => funcall();
+
+  methods:
+      "call"
+        usebundle => no_arg_bundle_gets_braces_removed,
+        something => body_no_args_gets_braces_removed,
+        ifvarclass => keep_ifvarclass_braces();
+
+  commands:
+      "/bin/ls" ifvarclass => or();
+}
+
+body something body_no_args_gets_braces_removed {
+    key => func();
+}
+
 bundle agent empty_bundle {
 }
 

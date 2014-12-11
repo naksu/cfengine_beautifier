@@ -114,6 +114,31 @@ classes: "i_am_class"
 
 }
 
+bundle agent bundle_no_args_gets_braces_removed() {
+  vars:
+  "state" data => datastate();
+  "as" data => funcall("jk");
+  "now" int  => now();
+  "slist_" slist => funcall();
+  "rlist_" rlist => funcall();
+  "ilist_" ilist => funcall();
+  "int_" int => funcall();
+  "real_" real => funcall();
+  "string_" string => funcall();
+  "data_" data => funcall();
+
+  methods:
+    "call" usebundle  => no_arg_bundle_gets_braces_removed()
+        something => body_no_args_gets_braces_removed(),
+     ifvarclass => keep_ifvarclass_braces();
+
+  commands:
+    "/bin/ls" ifvarclass => or();
+}
+
+body something body_no_args_gets_braces_removed() {
+  key  => func();
+}
 
 
   bundle
